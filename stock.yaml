@@ -1,0 +1,92 @@
+/arctiles:
+  get:
+    description: Afficher touts les articles
+    responses:
+      200:
+        body:
+          application/json:
+            examples:
+              [
+                {
+                  id: 1,
+                  name: "Bon Lait",
+                  description: "String",
+                  categorie_id: 1,
+                  quantity: 18
+                },
+                {
+                  id: 2,
+                  name: "Sardine",
+                  description: "String",
+                  categorie_id: 1,
+                  quantity: 18
+                }
+              ]
+  post:
+    description: Crée un article
+    body:
+      application/json:
+        examples:
+          {
+            name: "Bon Lait",
+            description: "String",
+            categorie_id: 1,
+            quantity: 18
+          }
+    responses:
+      201:
+        body:
+          application/json:
+            examples:
+              {
+                message: "Article ajouté avec succès"
+              }
+  /{idArticle}:
+    uriParams:
+      idArticle: "String"
+    get:
+      description: Get article by Id
+      responses:
+        200:
+          body:
+            application/json:
+              examples:
+                {
+                  id: 1,
+                  name: "Bon Lait",
+                  description: "String",
+                  categorie_id: 1,
+                  quantity: 18
+                }
+        404:
+    patch:
+      body:
+        application/json:
+          examples: 
+            {
+              nom: "Article",
+              description: "Nouvelle description",
+              quantity: 12
+            }
+      responses:
+        204:
+        404:
+    delete:
+      description: Supprimer un article
+      responses:
+        204:
+        404:
+                  
+
+
+
+
+
+
+
+
+
+
+
+
+app.include_router(routes.articles.router)
