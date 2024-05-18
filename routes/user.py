@@ -2,7 +2,7 @@ from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, HTTPException, status
 from app.database import db 
-
+import utilities
 
 users_collection = db["users"]
 
@@ -22,6 +22,7 @@ async def get_users():
 
 @router.post("", response_model=dict)
 async def create_user(user: dict):
+    user["password"] = utilities.hash_password(user["password"])
     new_user = await users_collection.insert_one(user)
     return {"id": str(new_user.inserted_id)}
 
@@ -53,3 +54,22 @@ async def delete_user(user_id: str):
             detail=f'No corresponding user with id: {user_id}'
         )
     return {"message": "User deleted successfully"}
+
+
+@router.post("login", response_model=dict)
+async def login(user_payload: dict):
+    user = await users_collection.find_one({"email": user_payload["email"]})
+    if user is  None:
+        raise HTTPException (
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Utilisateur inexistant "
+        )
+    verif_password = utilities.verify_password(user["password"], user_payload["password"])
+
+    if(not verif_password):
+        raise HTTPException (
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f'Mot de passe non valide '
+        )
+    token = utilities.generate_token(user["id"], user["email"])
+    return token
