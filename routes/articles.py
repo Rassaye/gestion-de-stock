@@ -1,9 +1,11 @@
 
-from typing import List
+from typing import Annotated, List
 from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status, Response
+from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi.security import OAuth2PasswordBearer
 from app.database import db 
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth")
 
 articles_collection = db["articles"]
 
@@ -11,23 +13,6 @@ router = APIRouter(
     prefix='/articles',
     tags=['Articles']
 )
-all_article = [
-    {
-        "id": 1,
-        "name": "Bon Lait",
-        "description": "String",
-        "categorie_id": 1,
-        "quantity": 18
-    },
-    {
-        "id": 2,
-        "name": "Sardine",
-        "description": "String",
-        "categorie_id": 1,
-        "quantity": 18
-        
-    }
-]
 
 
 @router.get("",response_model=List[dict])
@@ -44,9 +29,9 @@ async def get_articles():
 
     
 @router.post("")
-async def create_articles(articles: dict):
+async def create_articles(articles: dict, token: Annotated[str, Depends(oauth2_scheme)]):
     
-
+    
     new_article = await articles_collection.insert_one(articles)
     print(new_article)
     return {"id": str(new_article.inserted_id)}
