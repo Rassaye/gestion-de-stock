@@ -1,12 +1,10 @@
 from typing import List
 from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status
+from model.users import User
 from fastapi.security import OAuth2PasswordRequestForm
-from app.database import db 
 import utilities
 
-
-users_collection = db["users"]
 
 router = APIRouter(
     prefix='/auth',
@@ -15,7 +13,7 @@ router = APIRouter(
 
 @router.post("", response_model=dict)
 async def login(user_payload: OAuth2PasswordRequestForm= Depends()):
-    user = await users_collection.find_one({"email": user_payload.username})
+    user = await User.find_one({"username": user_payload.username})
     if user is  None:
         raise HTTPException (
             status_code=status.HTTP_404_NOT_FOUND,
