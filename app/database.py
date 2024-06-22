@@ -16,5 +16,5 @@ async def init_db():
 
     # Create a MongoDB client
     client = AsyncIOMotorClient(CONNECTION_STRING)
-
-    await init_beanie(database=client.db_name, document_models=[Article, Categorie, Store, User])
+    
+    await init_beanie(database=client.stock, document_models=[Article, Categorie, Store, User])

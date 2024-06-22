@@ -1,8 +1,8 @@
 
 from typing import Annotated, List
-from bson import ObjectId
 from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordBearer
+from pymongo.errors import DuplicateKeyError
 from model.articles import Article
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth")
@@ -18,7 +18,8 @@ async def get_articles() -> List[Article]:
     # print(articles_collection.find_one({"_id": "66361e48fa1bfdcc510281ff"})   )
     # articles=await articles_collection.find_one({"_id": "66361e48fa1bfdcc510281ff"}) 
     # print(articles)
-    articles=  Article.find_all().to_list()
+    articles= await Article.find_all().to_list()
+    print (articles)
     return articles
    
 
@@ -26,9 +27,19 @@ async def get_articles() -> List[Article]:
 @router.post("")
 async def create_articles(article: Article, token: Annotated[str, Depends(oauth2_scheme)]):
     
-    
-    article_created= await article.create()
-    return {"message": "Article ajouté avec succès"}
+    try:
+        article_created= await article.create()
+        return {"message": "Article ajouté avec succès"}
+    except DuplicateKeyError as e:
+        error_details = e.details
+        error_message = error_details.get('errmsg', str(e))
+
+        error_info = {
+            "error_description": "Duplicate entry detected",
+            "error_message": error_message          
+        }
+        raise HTTPException(status_code=400, detail=error_info)
+        
 
 
 @router.get("/{article_id}", response_model=Article)

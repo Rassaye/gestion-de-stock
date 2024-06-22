@@ -4,7 +4,6 @@ from beanie import Document, Indexed
 
 
 class Article(Document):
-    id: Optional[str] = Field(default=None, description="MongoDB document ObjectID")
     code_id: Indexed(str, unique=True)
     name: str
     categorie_id: str

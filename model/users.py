@@ -5,15 +5,15 @@ from beanie import Document, Indexed
 
 
 class User(Document):
-    id: Optional[str] = Field(default=None, description="MongoDB document ObjectID")
-    username: str
+   
+    username: Indexed(str, unique=True)
     password: str
-    email: str
+    email: Indexed(str, unique=True)
     created_at: datetime = datetime.now()
 
     class Settings:
         # The name of the collection to store these objects.
-        name = "categories"
+        name = "users"
     class Config:
         schema_extra = {
             "example": {
