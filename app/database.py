@@ -5,6 +5,7 @@ from model.articles import Article
 from model.categories import Categorie
 from model.stores import Store
 from model.users import User
+import certifi
 
 config = dotenv_values(".env")
 
@@ -15,6 +16,6 @@ async def init_db():
     CONNECTION_STRING = "mongodb+srv://sekoukanfory1997:hFgFX9qKb1Eu1xc7@cluster0.xrjqhqr.mongodb.net/"
 
     # Create a MongoDB client
-    client = AsyncIOMotorClient(CONNECTION_STRING)
+    client = AsyncIOMotorClient(CONNECTION_STRING, tlsCAFile=certifi.where())
     
     await init_beanie(database=client.stock, document_models=[Article, Categorie, Store, User])
