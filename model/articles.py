@@ -26,9 +26,9 @@ class Article(Document):
         }
 
 
-class Article_Post(BaseModel):
-    code_id: str
-    name: str
-    categorie_id: str
-    description: str
-    quantity: str
+class ArticleUpdate(BaseModel):
+    code_id: Optional[str] = None
+    name: Optional[str] = None
+    categorie_id: Optional[str] = None
+    description: Optional[str] = None
+    quantity: Optional[int] = None

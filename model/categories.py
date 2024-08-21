@@ -4,7 +4,7 @@ from beanie import Document, Indexed
 
 
 class Categorie(Document):
-    id: Optional[str] = Field(default=None, description="MongoDB document ObjectID")
+    #id: Optional[str] = Field(default=None, description="MongoDB document ObjectID")
     name: str
 
     class Settings:
@@ -17,3 +17,5 @@ class Categorie(Document):
                 "name": "Abdulazeez"
             }
         }
+class CategorieUpdate(BaseModel):
+    name: Optional[str] = None

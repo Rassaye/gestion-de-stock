@@ -3,7 +3,6 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from model.articles import Article
 from model.categories import Categorie
-from model.stores import Store
 from model.users import User
 import certifi
 
@@ -18,4 +17,4 @@ async def init_db():
     # Create a MongoDB client
     client = AsyncIOMotorClient(CONNECTION_STRING, tlsCAFile=certifi.where())
     
-    await init_beanie(database=client.stock, document_models=[Article, Categorie, Store, User])
+    await init_beanie(database=client.stock, document_models=[Article, Categorie, User])
