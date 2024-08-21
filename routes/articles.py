@@ -1,84 +1,87 @@
 
-from typing import List
-from bson import ObjectId
-from fastapi import APIRouter, HTTPException, status, Response
-from app.database import db 
+from typing import Annotated, List
+from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi.security import OAuth2PasswordBearer
+from pymongo.errors import DuplicateKeyError
+from model.articles import Article, ArticleUpdate
 
-
-articles_collection = db["articles"]
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth")
 
 router = APIRouter(
     prefix='/articles',
     tags=['Articles']
 )
-all_article = [
-    {
-        "id": 1,
-        "name": "Bon Lait",
-        "description": "String",
-        "categorie_id": 1,
-        "quantity": 18
-    },
-    {
-        "id": 2,
-        "name": "Sardine",
-        "description": "String",
-        "categorie_id": 1,
-        "quantity": 18
-        
-    }
-]
 
 
-@router.get("",response_model=List[dict])
-async def get_articles():
-    # print(articles_collection.find_one({"_id": "66361e48fa1bfdcc510281ff"})   )
-    # articles=await articles_collection.find_one({"_id": "66361e48fa1bfdcc510281ff"}) 
-    # print(articles)
-    articles= []
-    async for article in articles_collection.find({}):
-        article["_id"] = str(article["_id"])
-        articles.append(article)
+@router.get("")
+async def get_articles() -> List[Article]:
+    articles= await Article.find_all().to_list()
     return articles
-   
 
-    
 @router.post("")
-async def create_articles(articles: dict):
+async def create_articles(article: Article, token: Annotated[str, Depends(oauth2_scheme)]):
     
+    try:
+        article_created= await article.create()
+        return {"message": "Article ajouté avec succès"}
+    except DuplicateKeyError as e:
+        error_details = e.details
+        error_message = error_details.get('errmsg', str(e))
 
-    new_article = await articles_collection.insert_one(articles)
-    print(new_article)
-    return {"id": str(new_article.inserted_id)}
+        error_info = {
+            "error_description": "Duplicate entry detected",
+            "error_message": error_message          
+        }
+        raise HTTPException(status_code=400, detail=error_info)
+        
 
 
-@router.get("/{article_id}")
-async def get_article_by_id(article_id: str):
-    article = await articles_collection.find_one({"_id": ObjectId(article_id)})
+@router.get("/{article_id}", response_model=Article)
+async def get_article_by_id(article_id:  str, token: Annotated[str, Depends(oauth2_scheme)]) :
+    article  = await Article.get(article_id)
     if article is None:
         raise HTTPException (
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f'No corresponding product with id: {article_id}'
             )
-    article["_id"] = str(article["_id"])
     
     return article
 
 @router.patch("/{article_id}")
-async def update_article(article_id: str, updated_article: dict):
-    await articles_collection.update_one({"_id": ObjectId(article_id)}, {"$set": updated_article})
+async def update_article(article_id: str, payload: ArticleUpdate, token: Annotated[str, Depends(oauth2_scheme)]):
+    # Récupérer l'article à partir de la base de données
+    article = await Article.get(article_id)
+
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+
+    # Mise à jour des champs si présents dans le payload
+    if payload.code_id is not None:
+        article.code_id = payload.code_id
+
+    if payload.name is not None:
+        article.name = payload.name
+
+    if payload.categorie_id is not None:
+        article.categorie_id = payload.categorie_id
+
+    if payload.description is not None:
+        article.description = payload.description
+
+    if payload.quantity is not None:
+        article.quantity = payload.quantity
+
+    # Sauvegarde des modifications
+    await article.save()
     return {"message": "Article updated successfully"}
 
 
 @router.delete("/{article_id}")
-async def delete_article(article_id: str):
-    result = await articles_collection.delete_one({"_id": ObjectId(article_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f'No corresponding product with id: {article_id}'
-        )
+async def delete_article(article_id:  str, token: Annotated[str, Depends(oauth2_scheme)]):
+    article = await Article.get(article_id)
+    if not article:
+        raise HTTPException(status_code=404, detail="Article not found")
+    
+    await article.delete()
     return {"message": "Article deleted successfully"}
-
-
 

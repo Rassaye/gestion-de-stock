@@ -1,13 +1,20 @@
 from dotenv import dotenv_values
 from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
+from model.articles import Article
+from model.categories import Categorie
+from model.users import User
+import certifi
 
 config = dotenv_values(".env")
 
-# Load the MongoDB connection string from the environment variable MONGODB_URI
 
-CONNECTION_STRING = "mongodb+srv://sekoukanfory1997:hFgFX9qKb1Eu1xc7@cluster0.xrjqhqr.mongodb.net/"
+async def init_db():
+    # Load the MongoDB connection string from the environment variable MONGODB_URI
 
-# Create a MongoDB client
-client = AsyncIOMotorClient(CONNECTION_STRING)
+    CONNECTION_STRING = "mongodb+srv://sekoukanfory1997:hFgFX9qKb1Eu1xc7@cluster0.xrjqhqr.mongodb.net/"
 
-db = client["stock"] 
+    # Create a MongoDB client
+    client = AsyncIOMotorClient(CONNECTION_STRING, tlsCAFile=certifi.where())
+    
+    await init_beanie(database=client.stock, document_models=[Article, Categorie, User])

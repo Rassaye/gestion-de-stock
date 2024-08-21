@@ -5,7 +5,7 @@ from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth')
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='auth/login')
 pwd_context = CryptContext(schemes=["bcrypt"])
 
 #Used during the Signup operation
