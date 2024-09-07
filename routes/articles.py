@@ -5,7 +5,7 @@ from fastapi.security import OAuth2PasswordBearer
 from pymongo.errors import DuplicateKeyError
 from model.articles import Article, ArticleUpdate
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 router = APIRouter(
     prefix='/articles',
