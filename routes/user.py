@@ -16,7 +16,7 @@ async def get_users() -> List[User]:
     return users
 
 
-@router.post("", response_model=dict)
+@router.post("", response_model=dict,status_code=201)
 async def create_user(user: User):
     user.password = utilities.hash_password(user.password)
     try:

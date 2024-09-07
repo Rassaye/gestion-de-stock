@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from model.categories import Categorie, CategorieUpdate
 from fastapi.security import OAuth2PasswordBearer
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 router = APIRouter(
     prefix='/categories',
